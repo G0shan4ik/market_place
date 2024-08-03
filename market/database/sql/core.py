@@ -16,7 +16,7 @@ async def create_tables():
     async with engine.begin() as conn:  # engine.connect()
         await conn.run_sync(Base.metadata.create_all)
         logger.debug(
-            "Created tables: " + (", ".join(i for i in models.Base.metadata.tables))
+            "Created tables: " + (", ".join(i for i in Base.metadata.tables))
         )
         # await connection.commit()
 
