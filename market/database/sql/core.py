@@ -1,6 +1,7 @@
 from .config import settings
 from sqlalchemy.orm import DeclarativeBase, declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from loguru import logger
 
 
 engine = create_async_engine(
@@ -13,12 +14,12 @@ session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine
 
 
 async def create_tables():
-    async with engine.begin() as conn:  # engine.connect()
-        await conn.run_sync(Base.metadata.create_all)
+    async with engine.connect() as connection:  # engine.begin()
+        await connection.run_sync(Base.metadata.create_all)
         logger.debug(
             "Created tables: " + (", ".join(i for i in Base.metadata.tables))
         )
-        # await connection.commit()
+        await connection.commit()
 
 
 async def init():
