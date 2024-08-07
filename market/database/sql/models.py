@@ -73,3 +73,7 @@ class Product(Base):
 
     subcategory_id: Mapped[int] = mapped_column(ForeignKey('subcategory.id'))
     seller_id: Mapped[int] = mapped_column(ForeignKey('seller.id'))
+
+
+__all__ = ["Users", "Orders", "Category", "SubCategory",
+           "Product", "Seller", "Buyer"]
