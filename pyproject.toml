@@ -16,6 +16,7 @@ uvicorn = "^0.30.5"
 faker = "^26.1.0"
 python-dotenv = "^1.0.1"
 psycopg = "^3.2.1"
+pydantic-settings = "^2.4.0"
 
 
 [tool.poetry.scripts]
