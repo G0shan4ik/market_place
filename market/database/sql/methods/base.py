@@ -1,6 +1,7 @@
 from abc import ABC
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..models import *
+
+from market.database.sql.models import *
 
 
 class BaseDatabaseDep(ABC):

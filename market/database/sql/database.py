@@ -27,3 +27,8 @@ def sql_helper_factory(_dep: Type[dependent_type]):
             yield instance
 
     return dep
+
+
+__all__ = [
+    'sql_helper_factory'
+]
