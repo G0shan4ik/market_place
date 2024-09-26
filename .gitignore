@@ -1,6 +1,6 @@
-__pycache__/
-.idea
-
+**/__pycache__
+.idea/*
+.vscode/*
 
 # Poetry
 poetry.lock
@@ -12,6 +12,5 @@ __pypackages__/
 
 # Environments
 .env
-
 
 test.py

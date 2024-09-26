@@ -2,7 +2,7 @@ FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-COPY . .
+COPY pyproject.toml .
 
 RUN pip install poetry && apt update -y && apt install libpq-dev -y && \
     poetry config virtualenvs.create false && \
