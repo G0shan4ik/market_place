@@ -1,3 +1,5 @@
+import sys
+
 from sqlalchemy.orm import DeclarativeBase, declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from loguru import logger
@@ -15,7 +17,7 @@ PORT = getenv("POSTGRES_PORT")
 DB = getenv("POSTGRES_DB")
 
 uri = f"{USER}:{PASSWORD}@{HOST}:{PORT}/{DB}"
-print(uri)
+print(f"postgresql+psycopg_async://{uri}")
 
 engine = create_async_engine(
     url=f"postgresql+psycopg_async://{uri}",
@@ -26,9 +28,12 @@ Base: DeclarativeBase = declarative_base()
 session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
 
 
-async def create_tables():
+async def init_database():
+    print(1)
     async with engine.connect() as connection:  # engine.begin()
+        print(2)
         await connection.run_sync(Base.metadata.create_all)
+        print(3)
         logger.debug(
             "Created tables: " + (", ".join(i for i in Base.metadata.tables))
         )
@@ -36,4 +41,13 @@ async def create_tables():
 
 
 async def init():
-    await create_tables()
+    await init_database()
+
+
+if __name__ == '__main__':
+    import asyncio
+
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    asyncio.run(init())

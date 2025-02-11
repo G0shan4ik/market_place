@@ -11,7 +11,7 @@ from .methods.base import BaseDatabaseDep
 dependent_type = TypeVar('dependent_type', bound=Type[BaseDatabaseDep])
 
 
-async def get_session():
+async def get_session() -> AsyncSession:
     async with session_maker() as session:
         yield session
 

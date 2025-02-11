@@ -1,16 +1,16 @@
 import asyncio
-from market.database.sql.core import init
-from subprocess import run
+import sys
+
 from market.api.core import app
 
 
-# def start_test():
-#     asyncio.run(init())
+def start_test():
+    from subprocess import run
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-
-def start_dev():
     run(["uvicorn", "main:app", "--reload", "--host=127.0.0.1", "--port=8000", "--reload"])
 
 
-if __name__ == '__main__':
-    init()
+# def start_dev():
+#     run(["uvicorn", "main:app", "--reload", "--host=0.0.0.0", "--port=8000", "--reload"])

@@ -1,2 +1,2 @@
 from .base import BaseDatabaseDep
-from .users import *
+from . import users
