@@ -1,13 +1,22 @@
-from .routes import router
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from subprocess import call
+from market.database.sql.core import init_database
 
-app = FastAPI()
-app.include_router(router)
-
-
-def start_server():
-    call(["uvicorn", "resys:app", "--reload", "--host=0.0.0.0"])
+from os import getenv
+from dotenv import load_dotenv
 
 
-__all__ = ["start_server", "app"]
+load_dotenv()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+	await init_database()
+	yield
+
+
+app = FastAPI(
+    debug=bool(getenv("DEBUG", True)),
+    lifespan=lifespan
+)
+
+__all__ = ["app"]

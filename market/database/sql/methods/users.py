@@ -1,7 +1,10 @@
+import asyncio
 from datetime import datetime
-from typing import Optional, Dict, List
+from typing import Optional
 
-from market.api.datamodels import UserSeller
+from sqlalchemy.sql.functions import session_user
+
+from market.api.datamodels import UserSeller, UserActive
 from .include import User, UserRole, select, update, insert, BaseDatabaseDep, UserCreate
 
 
@@ -11,69 +14,120 @@ class UserService(BaseDatabaseDep):
         temp_user.password = user.password
         password_hash = temp_user.password_hash
 
+        stmt = select(User).where(
+            User.email == user.email).where(
+            User.is_active == True
+        )
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
+        if result:
+            raise ValueError('Пользователь уже зарегистрирован!')
+
         stmt = insert(User).values(
             username=user.username,
             email=user.email,
             password_hash=password_hash,
-            role=UserRole.BUYER,
+            role=UserRole.BUYER.value,
             is_active=True,
-            phone_number=user.phone_number,
         ).returning(User.id)
 
         result = await self.session.execute(stmt)
         await self.session.commit()
         return result.scalar()
 
-    async def deactivate_user(self, user_id: int) -> None:
-        stmt = (
-            update(User)
-            .where(User.id == user_id)
-            .values(is_active=False)
+    async def sign_in(self, user: UserActive) -> Optional[dict]:
+        """
+            Sign in account
+        :param user:
+        :return: dict { key: role, key: username }
+        """
+        stmt = select(User).where(
+            User.email == user.email
         )
-        await self.session.execute(stmt)
-        await self.session.commit()
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def get_by_id(self, user_id: int) -> Optional[User]:
-        stmt = (
-            select(User)
-            .where(User.id == user_id)
+        if result:
+            check_valid_pass: bool = User().check_password(
+                simple_password=user.password,
+                hashed_password=result.password_hash
+            )
+            if check_valid_pass:
+                if result.is_active:
+                    return {
+                        'role': result.role,
+                        'username': result.username,
+                    }
+                else:
+                    raise ValueError('Аккаунт пользователя удален')
+            else:
+                raise ValueError('Неверный пароль!')
+        else:
+            raise ValueError('Пользователя не существует!')
+
+    async def deactivate_user(self, user_id: int) -> bool:
+        try:
+            stmt = (
+                update(User)
+                .where(User.id == user_id)
+                .values(is_active=False)
+            )
+            await self.session.execute(stmt)
+            await self.session.commit()
+
+            return True
+        except Exception as ex:
+            raise Exception(ex)
+
+    async def get_by_id(self, user_id: int) -> User:
+        stmt = select(User).where(
+            User.id == user_id
         )
-        result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+        result = (await self.session.execute(stmt)).scalar()
 
-    async def update_user(self, user_id: int, **data: Dict) -> None:
-        allowed_fields = {
-            "username",
-            "email",
-            "phone_number",
-            "company_name",
-            "tax_id"
-        }
-        update_data = {k: v for k, v in data.items() if k in allowed_fields}
+        return result
 
-        if not update_data:
-            raise ValueError("Нет полей для обновления")
 
-        stmt = (
-            update(User)
-            .where(User.id == user_id)
-            .values(**update_data)
-        )
-        await self.session.execute(stmt)
-        await self.session.commit()
+    async def update_user(self, user_id: int, **data: dict) -> None:
+        stmt = select(User).where(User.id == user_id)
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def promote_to_seller(self, user: UserSeller) -> None:
-        stmt = (
-            update(User)
-            .where(User.id == user.id)
-            .values(
+        if result:
+            allowed_fields = {
+                "username",
+                "email",
+                "phone_number",
+                "company_name",
+                "tax_id"
+            }
+            update_data = {k: v for k, v in data.items() if k in allowed_fields}
+
+            if not update_data:
+                raise ValueError("Нет полей для обновления")
+
+            stmt = (
+                update(User)
+                .where(User.id == user_id)
+                .values(**update_data)
+            )
+            await self.session.execute(stmt)
+            await self.session.commit()
+
+            return
+        raise ValueError('Пользователь не найден!')
+
+    async def promote_to_seller(self, user: UserSeller) -> int:
+        stmt = update(User).where(
+            User.id == user.id
+        ).values(
                 role=UserRole.SELLER,
                 company_name=user.company_name,
-                tax_id=user.tax_id
-            )
-        )
-        await self.session.execute(stmt)
+                tax_id=user.tax_id,
+                phone_number=user.phone_number
+        ).returning(User.id)
+
+        result = await self.session.execute(stmt)
         await self.session.commit()
+        return result.scalar()
+
 
     async def get_by_role(
             self,
@@ -89,5 +143,5 @@ class UserService(BaseDatabaseDep):
             .limit(per_page)
         )
         result = await self.session.execute(stmt)
-        print('\n\n', result, '\n', await self.session.stream_scalars(stmt), '\n', result.scalars().all(), '\n', result.scalars(), '\n\n')
+
         return result.scalars().all()

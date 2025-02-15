@@ -29,11 +29,11 @@ session_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine
 
 
 async def init_database():
-    print(1)
     async with engine.connect() as connection:  # engine.begin()
-        print(2)
+
+        # await connection.run_sync(Base.metadata.drop_all)
+
         await connection.run_sync(Base.metadata.create_all)
-        print(3)
         logger.debug(
             "Created tables: " + (", ".join(i for i in Base.metadata.tables))
         )

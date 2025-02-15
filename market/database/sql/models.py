@@ -1,12 +1,13 @@
-import asyncio
 import enum
 import re
 from datetime import datetime
 
+from typing import Optional
+
 import bcrypt
-from sqlalchemy import ForeignKey, String, BigInteger, Enum, Index, CheckConstraint
+from sqlalchemy import ForeignKey, String, BigInteger, Enum, CheckConstraint, Integer
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates, backref
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from .core import Base
 
@@ -35,16 +36,16 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(BigInteger(), autoincrement=True, primary_key=True)
     username: Mapped[str] = mapped_column(String(50), nullable=False)
-    email: Mapped[str] = mapped_column(String(100), nullable=False)
+    email: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(60), nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False, default=UserRole.BUYER)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole, values_callable=lambda enum_class: [member.value for member in enum_class], create_type=False), nullable=False, default=UserRole.BUYER.value)
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    company_name: Mapped[str|None] = mapped_column(String(100), nullable=False)
-    tax_id: Mapped[str|None] = mapped_column(String(20), nullable=False)
+    company_name: Mapped[Optional[str]] = mapped_column(String(100))
+    tax_id: Mapped[Optional[str]] = mapped_column(String(20))
 
-    phone_number: Mapped[str|None] = mapped_column(String(20), nullable=False)
+    phone_number: Mapped[Optional[str]] = mapped_column(String(20), unique=True)
 
     @hybrid_property
     def password(self):
@@ -78,13 +79,14 @@ class User(Base):
         salt = bcrypt.gensalt()
         self.password_hash = bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-    def check_password(self, password: str) -> bool:
+    def check_password(self, simple_password: str, hashed_password: str) -> bool:
         """
-            Checks the encrypted password or not
-        :param password: The password that we compare with self.password_hash
+            Checks passwords for identity
+        :param simple_password: Unencrypted password
+        :param hashed_password: Hashed password
         :return: bool
         """
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        return bcrypt.checkpw(simple_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
     @validates('password_hash')
     def validate_password_hash(self, key, password_hash: str) -> str | None:
@@ -96,15 +98,15 @@ class User(Base):
 class Category(Base):
     __tablename__ = 'categories'
 
-    id: Mapped[int] = mapped_column(BigInteger(), autoincrement=True, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), autoincrement=True, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    parent_id: Mapped[int] = mapped_column(ForeignKey('categories.id'))
+    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey('categories.id'), nullable=True)
 
 
 class Product(Base):
     __tablename__ = 'products'
 
-    id: Mapped[int] = mapped_column(BigInteger(), autoincrement=True, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), autoincrement=True, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(2048))
     price: Mapped[float]
@@ -114,11 +116,6 @@ class Product(Base):
 
     seller_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
-
-    __table_args__ = (
-        Index('idx_product_name', 'name'),
-        Index('idx_product_price', 'price'),
-    )
 
 
 class Order(Base):
@@ -131,7 +128,7 @@ class Order(Base):
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     buyer_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    shipping_address_id: Mapped[int|None] = mapped_column(ForeignKey('addresses.id'))
+    shipping_address_id: Mapped[Optional[int]] = mapped_column(ForeignKey('addresses.id'))
 
 
 class OrderItem(Base):
@@ -148,7 +145,7 @@ class OrderItem(Base):
 class Address(Base):
     __tablename__ = 'addresses'
 
-    id: Mapped[int] = mapped_column(BigInteger(), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True)
     street: Mapped[str] = mapped_column(String(256), nullable=False)
     city: Mapped[str] = mapped_column(String(64), nullable=False)
     state: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -161,7 +158,7 @@ class Address(Base):
 class Payment(Base):
     __tablename__ = 'payments'
 
-    id: Mapped[int] = mapped_column(BigInteger(), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True)
     amount: Mapped[float] = mapped_column(nullable=False)
     transaction_id: Mapped[str] = mapped_column(String(128), unique=True)
     payment_method: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -190,7 +187,7 @@ class Review(Base):
 class Cart(Base):
     __tablename__ = 'carts'
 
-    id: Mapped[int] = mapped_column(BigInteger(), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
@@ -200,7 +197,7 @@ class Cart(Base):
 class CartItem(Base):
     __tablename__ = 'cart_items'
 
-    id: Mapped[int] = mapped_column(BigInteger(), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True)
     quantity: Mapped[int] = mapped_column(default=1, nullable=False)
 
     cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id'), nullable=False)
