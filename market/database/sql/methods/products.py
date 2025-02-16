@@ -1,58 +1,68 @@
-from market.database.sql.models import Product
+from typing import Optional
+
+from .include import Product, ProductCreate, select, delete, update, insert, BaseDatabaseDep
 
 
-class ProductService:
-    @staticmethod
-    def create_product(session, name: str, description: str, price: float, seller_id: int, category_id: int, stock: int = 0) -> Product:
-        """
-        Создание нового продукта.
-        """
-        product = Product(
-            name=name,
-            description=description,
-            price=price,
-            seller_id=seller_id,
-            category_id=category_id,
-            stock=stock
+class ProductService(BaseDatabaseDep):
+    async def create_product(self, product_: ProductCreate) -> int:
+        stmt = insert(Product).values(
+            name = product_.name,
+            description = product_.description,
+            price = product_.price,
+            stock = product_.stock,
+            seller_id = product_.seller_id,
+            category_id = product_.category_id
+        ).returning(Product.id)
+
+        result = await self.session.execute(stmt)
+        await self.session.commit()
+        return result.scalar()
+
+    async def get_product_by_id(self, product_id: int) -> Optional[Product]:
+        stmt = select(Product).where(
+            Product.id == product_id
         )
-        session.add(product)
-        session.commit()
-        return product
+        return (await self.session.execute(stmt)).scalar_one_or_none()
 
-    @staticmethod
-    def get_product_by_id(session, product_id: int) -> Product:
-        """
-        Получение продукта по ID.
-        """
-        return session.query(Product).filter(Product.id == product_id).first()
-
-    @staticmethod
-    def update_product(session, product_id: int, **kwargs) -> Product:
-        """
-        Обновление данных продукта.
-        """
-        product = session.query(Product).filter(Product.id == product_id).first()
+    async def update_product(self, product_id: int, **data) -> bool:
+        product = self.get_product_by_id(product_id=product_id)
         if product:
-            for key, value in kwargs.items():
-                setattr(product, key, value)
-            session.commit()
-        return product
+            allowed_fields = {
+                "name",
+                "description",
+                "price",
+                "stock"
+            }
+            update_data = {k: v for k, v in data.items() if k in allowed_fields}
 
-    @staticmethod
-    def delete_product(session, product_id: int) -> bool:
-        """
-        Удаление продукта по ID.
-        """
-        product = session.query(Product).filter(Product.id == product_id).first()
+            if not update_data:
+                raise ValueError("Нет полей для обновления")
+
+            stmt = (
+                update(Product)
+                .where(Product.id == product_id)
+                .values(**update_data)
+            )
+            await self.session.execute(stmt)
+            await self.session.commit()
+
+            return True
+        raise ValueError('Продукт не найден!')
+
+    async def delete_product(self, product_id: int) -> bool:
+        product = self.get_product_by_id(product_id)
         if product:
-            session.delete(product)
-            session.commit()
+            stmt = delete(Product).where(Product.id == product_id)
+
+            await self.session.execute(stmt)
+            await self.session.commit()
             return True
         return False
 
-    @staticmethod
-    def get_products_by_category(session, category_id: int) -> list[Product]:
-        """
-        Получение всех продуктов в категории.
-        """
-        return session.query(Product).filter(Product.category_id == category_id).all()
+    async def get_products_by_category(self, category_id: int) -> [Product]:
+        stmt = select(Product).filter(
+            Product.category_id == category_id
+        )
+
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

@@ -48,8 +48,8 @@ class UserRequestUpdate(BaseModel):
 class ProductCreate(BaseModel):
     name: str
     description: str
-    price: float = Field(gt=0)
-    stock: int = Field(ge=0)
+    price: float
+    stock: int = 0
     seller_id: int
     category_id: int
 
