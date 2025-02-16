@@ -110,7 +110,7 @@ class Product(Base):
     name: Mapped[str] = mapped_column(String(64), nullable=False)
     description: Mapped[str] = mapped_column(String(2048))
     price: Mapped[float]
-    stock: Mapped[int] = mapped_column(default=0)
+    stock: Mapped[int] = mapped_column(default=0)  # quantity of goods in stock
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
