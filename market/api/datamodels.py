@@ -44,6 +44,7 @@ class UserRequestUpdate(BaseModel):
     company_name: Optional[str] = None
     tax_id: Optional[str] = None
 
+
 class ProductCreate(BaseModel):
     name: str
     description: str
@@ -117,3 +118,12 @@ class PaymentResponse(BaseModel):
     payment_method: str
     status: PaymentStatus
     created_at: datetime
+
+
+class CreateCategory(BaseModel):
+    name: str
+    parent_id: Optional[int] = None
+
+class UpdateCategory(BaseModel):
+    name: Optional[str] = None
+    parent_id: Optional[int] = None
