@@ -1,5 +1,3 @@
-from typing import Optional
-
 from .include import Product, ProductCreate, select, delete, update, insert, BaseDatabaseDep
 
 
@@ -18,7 +16,7 @@ class ProductService(BaseDatabaseDep):
         await self.session.commit()
         return result.scalar()
 
-    async def get_product_by_id(self, product_id: int) -> Optional[Product]:
+    async def get_product_by_id(self, product_id: int) -> Product:
         stmt = select(Product).where(
             Product.id == product_id
         )

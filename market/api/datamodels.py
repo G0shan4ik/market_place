@@ -73,7 +73,7 @@ class OrderStatus(str, Enum):
 
 class OrderCreate(BaseModel):
     buyer_id: int
-    total_amount: float = Field(gt=0)
+    total_amount: float = 1
     shipping_address_id: int
 
 class OrderResponse(BaseModel):

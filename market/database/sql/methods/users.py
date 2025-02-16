@@ -124,12 +124,7 @@ class UserService(BaseDatabaseDep):
         await self.session.commit()
         return result.scalar()
 
-    async def get_by_role(
-            self,
-            role: UserRole,
-            page: int = 1,
-            per_page: int = 10
-    ) -> [User]:
+    async def get_by_role(self, role: UserRole, page: int = 1, per_page: int = 10) -> [User]:
         offset = (page - 1) * per_page
         stmt = (
             select(User)
