@@ -1,7 +1,7 @@
 from market.database.sql.models import Category
 from typing import Optional
 
-from .include import select, update, delete, insert, BaseDatabaseDep, CreateCategory, UpdateCategory
+from .include import select, update, delete, insert, BaseDatabaseDep, CreateCategory
 
 class CategoryService(BaseDatabaseDep):
     async def create_category(self, category: CreateCategory) -> int:
@@ -30,14 +30,14 @@ class CategoryService(BaseDatabaseDep):
 
         raise ValueError(f'Категории с ID == {category_id} не существует!')
 
-    async def get_all_categories(self, limit: int = None) -> list[Category]:
+    async def get_all_categories(self, limit: int = None) -> [Category]:
         stmt = select(Category)
         if limit is not None:
             stmt = stmt.limit(limit)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def get_child_categories(self, parent_id: int) -> list[Category]:
+    async def get_child_categories(self, parent_id: int) -> [Category]:
         """
         Возвращает список дочерних категорий для указанной родительской категории.
         :param parent_id: ID родительской категории.
@@ -89,6 +89,8 @@ class CategoryService(BaseDatabaseDep):
         if not category:
             return False
 
-        await self.session.delete(category)
+        stmt = delete(Category).where(Category.id == category_id)
+
+        await self.session.execute(stmt)
         await self.session.commit()
         return True

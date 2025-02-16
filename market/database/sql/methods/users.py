@@ -83,7 +83,7 @@ class UserService(BaseDatabaseDep):
 
         raise ValueError(f'Пользователя с ID == {user_id} не существует!')
 
-    async def update_user(self, user_id: int, **data: dict) -> None:
+    async def update_user(self, user_id: int, **data: dict) -> bool:
         result = await self.get_by_id(user_id)
 
         if result:
@@ -107,7 +107,7 @@ class UserService(BaseDatabaseDep):
             await self.session.execute(stmt)
             await self.session.commit()
 
-            return
+            return True
         raise ValueError('Пользователь не найден!')
 
     async def promote_to_seller(self, user: UserSeller) -> int:
@@ -129,7 +129,7 @@ class UserService(BaseDatabaseDep):
             role: UserRole,
             page: int = 1,
             per_page: int = 10
-    ) -> list[User]:
+    ) -> [User]:
         offset = (page - 1) * per_page
         stmt = (
             select(User)
