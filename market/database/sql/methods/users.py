@@ -1,8 +1,4 @@
-import asyncio
-from datetime import datetime
 from typing import Optional
-
-from sqlalchemy.sql.functions import session_user
 
 from market.api.datamodels import UserSeller, UserActive
 from .include import User, UserRole, select, update, insert, BaseDatabaseDep, UserCreate
@@ -77,18 +73,18 @@ class UserService(BaseDatabaseDep):
         except Exception as ex:
             raise Exception(ex)
 
-    async def get_by_id(self, user_id: int) -> User:
+    async def get_by_id(self, user_id: int) -> Optional[User]:
         stmt = select(User).where(
             User.id == user_id
         )
-        result = (await self.session.execute(stmt)).scalar()
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
+        if result:
+            return result
 
-        return result
-
+        raise ValueError(f'Пользователя с ID == {user_id} не существует!')
 
     async def update_user(self, user_id: int, **data: dict) -> None:
-        stmt = select(User).where(User.id == user_id)
-        result = (await self.session.execute(stmt)).scalar_one_or_none()
+        result = await self.get_by_id(user_id)
 
         if result:
             allowed_fields = {
@@ -127,7 +123,6 @@ class UserService(BaseDatabaseDep):
         result = await self.session.execute(stmt)
         await self.session.commit()
         return result.scalar()
-
 
     async def get_by_role(
             self,
