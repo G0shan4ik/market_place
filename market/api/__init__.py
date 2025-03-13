@@ -1,5 +1,5 @@
 from .core import app
-from .routes import user_router, product_router, review_router, payment_router
+from .routers import user_router, product_router, review_router, payment_router
 
 app.include_router(user_router)
 app.include_router(product_router)
