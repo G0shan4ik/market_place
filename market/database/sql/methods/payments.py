@@ -1,29 +1,35 @@
-from market.database.sql.models import Payment, PaymentStatus
+from .include import Payment, select, update, insert, BaseDatabaseDep, PaymentStatus, PaymentCreate, Optional
 
 
-class PaymentService:
-    @staticmethod
-    def create_payment(session, order_id: int, amount: float, payment_method: str, transaction_id: str) -> Payment:
-        """
-        Создание платежа.
-        """
-        payment = Payment(
-            order_id=order_id,
-            amount=amount,
-            payment_method=payment_method,
-            transaction_id=transaction_id
+class PaymentService(BaseDatabaseDep):
+    async def create_payment(self, payment: PaymentCreate) -> int:
+        stmt = insert(Payment).values(
+            order_id=payment.order_id,
+            amount=payment.amount,
+            payment_method=payment.payment_method,
+            transaction_id=payment.transaction_id
         )
-        session.add(payment)
-        session.commit()
-        return payment
+        payment_id: int = (await self.session.execute(stmt)).scalar()
+        await self.session.commit()
+        return payment_id
 
-    @staticmethod
-    def update_payment_status(session, payment_id: int, status: PaymentStatus) -> Payment:
-        """
-        Обновление статуса платежа.
-        """
-        payment = session.query(Payment).filter(Payment.id == payment_id).first()
-        if payment:
-            payment.status = status
-            session.commit()
-        return payment
+    async def get_payment_by_id(self, payment_id: int) -> Optional[Payment]:
+        stmt = select(Payment).where(
+            Payment.id == payment_id
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def update_payment_status(self, payment_id: int, status: PaymentStatus) -> bool:
+        if await self.get_payment_by_id(payment_id):
+            stmt = (
+                update(Payment)
+                .where(Payment.id == payment_id)
+                .values(
+                    status=status
+                )
+            )
+            await self.session.execute(stmt)
+            await self.session.commit()
+
+            return True
+        return False
