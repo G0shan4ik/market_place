@@ -1,7 +1,6 @@
 from typing import Optional
 
-from market.api.datamodels import UserSeller, UserActive
-from .include import User, UserRole, select, update, insert, BaseDatabaseDep, UserCreate
+from .include import User, UserRole, select, update, insert, BaseDatabaseDep, UserCreate, UserSeller, UserActive
 
 
 class UserService(BaseDatabaseDep):

@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
@@ -57,7 +57,7 @@ class ProductResponse(BaseModel):
     id: int
     name: str
     description: str
-    price: float
+    price: float = Field(ge=0)
     stock: int
     seller_id: int
     category_id: int
@@ -73,7 +73,7 @@ class OrderStatus(str, Enum):
 
 class OrderCreate(BaseModel):
     buyer_id: int
-    total_amount: float = 1
+    total_amount: float = Field(ge=0)
     shipping_address_id: int
 
 class OrderResponse(BaseModel):
@@ -107,7 +107,7 @@ class PaymentStatus(str, Enum):
 
 class PaymentCreate(BaseModel):
     order_id: int
-    amount: float = Field(gt=0)
+    amount: float = Field(ge=0)
     payment_method: str
     transaction_id: str
 
@@ -127,3 +127,8 @@ class CreateCategory(BaseModel):
 class UpdateCategory(BaseModel):
     name: Optional[str] = None
     parent_id: Optional[int] = None
+
+class CartItemUpdate(BaseModel):
+    cart_id: int
+    product_id: int
+    quantity: int
