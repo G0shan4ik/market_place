@@ -1,13 +1,13 @@
-from .include import Review, select, delete, insert, BaseDatabaseDep
+from .include import Review, select, delete, insert, BaseDatabaseDep, ReviewCreate
 
 
 class ReviewService(BaseDatabaseDep):
-    async def create_review(self, user_id: int, product_id: int, rating: int, comment: str) -> int:
+    async def create_review(self, review: ReviewCreate) -> int:
         stmt = insert(Review).values(
-            user_id=user_id,
-            product_id=product_id,
-            rating=rating,
-            comment=comment
+            user_id=review.user_id,
+            product_id=review.product_id,
+            rating=review.rating,
+            comment=review.comment
         ).returning(Review.id)
 
         review_id: int = (await self.session.execute(stmt)).scalar()
