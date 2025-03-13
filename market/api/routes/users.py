@@ -52,7 +52,10 @@ async def update_user_data(
     user: UserRequestUpdate,
     user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]
 ):
-    await user_db.update_user(user_id, **user.model_dump(exclude_unset=True))
+    status: bool = await user_db.update_user(user_id, **user.model_dump(exclude_unset=True))
+    return {
+        'status': status
+    }
 
 
 @user_router.post(
