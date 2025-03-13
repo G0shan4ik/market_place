@@ -8,6 +8,9 @@ from enum import Enum
 class CreatedModel(BaseModel):
     created_id: int
 
+class StatusModel(BaseModel):
+    status: bool
+
 
 class UserRole(str, Enum):
     BUYER = "buyer"
@@ -60,6 +63,12 @@ class ProductResponse(BaseModel):
     seller_id: int
     category_id: int
     created_at: datetime
+
+class ProductUpdate(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
+    price: Optional[int]
+    stock: Optional[int]
 
 
 class OrderStatus(str, Enum):

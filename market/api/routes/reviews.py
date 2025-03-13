@@ -63,7 +63,7 @@ async def get_reviews_by_product(
     review_db: Annotated[ReviewService, Depends(sql_helper_factory(ReviewService))]
 ):
     _review: [Review] = await review_db.get_reviews_by_product(product_id)
-    result: [ReviewResponse] = {}
+    result = {}
     if _review:
         for review in _review:
             inspector = inspect(Review)
