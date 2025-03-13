@@ -46,6 +46,29 @@ async def delete_account(
     }
 
 
+@user_router.post('/update_user')
+async def update_user_data(
+    user_id: int,
+    user: UserRequestUpdate,
+    user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]
+):
+    await user_db.update_user(user_id, **user.model_dump(exclude_unset=True))
+
+
+@user_router.post(
+    '/user/promote_to_seller',
+    response_model=CreatedModel
+)
+async def create_seller(
+    user: UserSeller,
+    user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]
+):
+    created_id: int = await user_db.promote_to_seller(user)
+    return {
+        'created_id': created_id
+    }
+
+
 @user_router.get('/user/get_user_by_id/{user_id}')
 async def get_user_by_id(
         user_id: int,
@@ -60,14 +83,6 @@ async def get_user_by_id(
 
     return result
 
-
-@user_router.post('/update_user')  # Сделать проверки на всякую хуету
-async def update_user_data(
-    user_id: int,
-    user: UserRequestUpdate,
-    user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]
-):
-    await user_db.update_user(user_id, **user.model_dump(exclude_unset=True))
 
 @user_router.get('/user/get_user_by_role/')
 async def get_user_by_role(
@@ -92,17 +107,3 @@ async def get_user_by_role(
             result[_key] = dct
 
     return result
-
-
-@user_router.post(
-    '/user/promote_to_seller',
-    response_model=CreatedModel
-)
-async def create_seller(
-    user: UserSeller,
-    user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]
-):
-    created_id: int = await user_db.promote_to_seller(user)
-    return {
-        'created_id': created_id
-    }
