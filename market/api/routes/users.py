@@ -35,7 +35,10 @@ async def sign_in_account(
     return status_data
 
 
-@user_router.post('/user/delete_user/{user_id}')
+@user_router.post(
+    '/user/delete_user/{user_id}',
+    response_model=StatusModel
+)
 async def delete_account(
         user_id: int,
         user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]
@@ -46,7 +49,10 @@ async def delete_account(
     }
 
 
-@user_router.post('/update_user')
+@user_router.post(
+    '/update_user',
+    response_model=StatusModel
+)
 async def update_user_data(
     user_id: int,
     user: UserRequestUpdate,
@@ -72,7 +78,10 @@ async def create_seller(
     }
 
 
-@user_router.get('/user/get_user_by_id/{user_id}')
+@user_router.get(
+    '/user/get_user_by_id/{user_id}',
+    response_model=UserCreate
+)
 async def get_user_by_id(
         user_id: int,
         user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))]

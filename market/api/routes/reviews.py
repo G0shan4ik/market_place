@@ -23,7 +23,10 @@ async def create_review(
     }
 
 
-@review_router.post('/review/delete/{review_id}')
+@review_router.post(
+    '/review/delete/{review_id}',
+    response_model=StatusModel
+)
 async def delete_review(
     review_id: int,
     review_db: Annotated[ReviewService, Depends(sql_helper_factory(ReviewService))]
