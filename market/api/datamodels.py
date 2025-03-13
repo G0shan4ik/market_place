@@ -14,7 +14,6 @@ class UserRole(str, Enum):
     SELLER = "seller"
     ADMIN = "admin"
 
-
 class ActiveModel(BaseModel):
     role: UserRole
     username: str
@@ -23,7 +22,6 @@ class ActiveModel(BaseModel):
 class UserActive(BaseModel):
     email: EmailStr
     password: str
-
 
 class UserCreate(BaseModel):
     username: str
@@ -127,6 +125,7 @@ class CreateCategory(BaseModel):
 class UpdateCategory(BaseModel):
     name: Optional[str] = None
     parent_id: Optional[int] = None
+
 
 class CartItemUpdate(BaseModel):
     cart_id: int
