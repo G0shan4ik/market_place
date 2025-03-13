@@ -1,7 +1,5 @@
-from market.database.sql.models import Category
-from typing import Optional
+from .include import Category, select, update, delete, insert, BaseDatabaseDep, CreateCategory, Optional
 
-from .include import select, update, delete, insert, BaseDatabaseDep, CreateCategory
 
 class CategoryService(BaseDatabaseDep):
     async def create_category(self, category: CreateCategory) -> int:
@@ -50,13 +48,6 @@ class CategoryService(BaseDatabaseDep):
         return result.scalars().all()
 
     async def update_category(self, category_id: int, **data: dict) -> bool:
-        # """
-        # Обновляет данные категории.
-        # :param category_id: ID категории.
-        # :param name: Новое название категории (опционально).
-        # :param parent_id: Новый ID родительской категории (опционально).
-        # :return: Обновлённая категория или None, если категория не найдена.
-        # """
         result = await self.get_category_by_id(category_id)
         if not result:
             raise ValueError('Категория не найдена!')

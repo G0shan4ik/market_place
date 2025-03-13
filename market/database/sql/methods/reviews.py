@@ -1,4 +1,4 @@
-from .include import Review, select, delete, insert, BaseDatabaseDep, ReviewCreate
+from .include import Review, select, delete, insert, BaseDatabaseDep, ReviewCreate, Optional
 
 
 class ReviewService(BaseDatabaseDep):
@@ -15,14 +15,14 @@ class ReviewService(BaseDatabaseDep):
 
         return review_id
 
-    async def get_review_by_id(self, review_id: int):
+    async def get_review_by_id(self, review_id: int) -> Optional[Review]:
         stmt = select(Review).where(
             Review.id == review_id
         )
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def delete_review(self, review_id: int):
-        if self.get_review_by_id(review_id):
+    async def delete_review(self, review_id: int) -> bool:
+        if await self.get_review_by_id(review_id):
             stmt = delete(Review).where(
                 Review.id == review_id
             )

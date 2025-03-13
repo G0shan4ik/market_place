@@ -1,6 +1,4 @@
-from typing import Optional
-
-from .include import User, UserRole, select, update, insert, BaseDatabaseDep, UserCreate, UserSeller, UserActive
+from .include import User, UserRole, select, update, insert, BaseDatabaseDep, UserCreate, UserSeller, UserActive, Optional
 
 
 class UserService(BaseDatabaseDep):

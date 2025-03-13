@@ -1,4 +1,4 @@
-from .include import Product, ProductCreate, select, delete, update, insert, BaseDatabaseDep
+from .include import Product, ProductCreate, select, delete, update, insert, BaseDatabaseDep, Optional
 
 
 class ProductService(BaseDatabaseDep):
@@ -16,7 +16,7 @@ class ProductService(BaseDatabaseDep):
         await self.session.commit()
         return result.scalar()
 
-    async def get_product_by_id(self, product_id: int) -> Product:
+    async def get_product_by_id(self, product_id: int) -> Optional[Product]:
         stmt = select(Product).where(
             Product.id == product_id
         )

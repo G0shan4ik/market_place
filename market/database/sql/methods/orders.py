@@ -1,7 +1,6 @@
 from collections import defaultdict
-from typing import Optional
 
-from .include import Order, OrderItem, select, delete, OrderCreate, update, insert, BaseDatabaseDep, OrderStatus
+from .include import Order, OrderItem, select, delete, OrderCreate, update, insert, BaseDatabaseDep, OrderStatus, Optional
 
 
 class OrderService(BaseDatabaseDep):
