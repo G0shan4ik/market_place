@@ -170,3 +170,22 @@ class CartItemUpdate(BaseModel):
     cart_id: int
     product_id: int
     quantity: int
+
+
+class AddressUpdate(BaseModel):
+    street: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+
+class AddressCreate(BaseModel):
+    street: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    user_id: int
+
+class AddressResponse(AddressCreate):
+    id: int
