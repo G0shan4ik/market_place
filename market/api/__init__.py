@@ -5,7 +5,8 @@ from .routers import (
     review_router,
     payment_router,
     order_router,
-    category_router
+    category_router,
+    address_router
 )
 
 app.include_router(user_router)
@@ -14,3 +15,4 @@ app.include_router(review_router)
 app.include_router(payment_router)
 app.include_router(order_router)
 app.include_router(category_router)
+app.include_router(address_router)
