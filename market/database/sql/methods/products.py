@@ -1,4 +1,3 @@
-from market.api.datamodels import ProductUpdate
 from .include import Product, ProductCreate, select, delete, update, insert, BaseDatabaseDep, Optional
 
 
