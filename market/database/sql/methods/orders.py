@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from .include import Order, OrderItem, select, delete, OrderCreate, update, insert, BaseDatabaseDep, OrderStatus, Optional
+from .include import Order, OrderItem, OrderItemCreate, select, delete, OrderCreate, update, insert, BaseDatabaseDep, OrderStatus, Optional
 
 
 class OrderService(BaseDatabaseDep):
@@ -40,19 +40,13 @@ class OrderService(BaseDatabaseDep):
         await self.session.commit()
         return True
 
-    async def add_order_item(
-            self,
-            order_id: int,
-            product_id: int,
-            quantity: int,
-            price_at_purchase: float
-    ) -> int:
-        if await self.get_order_by_id(order_id):
+    async def add_order_item(self, order: OrderItemCreate) -> int:
+        if await self.get_order_by_id(order.order_id):
             stmt = insert(OrderItem).values(
-                quantity=quantity,
-                price_at_purchase=price_at_purchase,
-                order_id=order_id,
-                product_id=product_id
+                quantity=order.quantity,
+                price_at_purchase=order.price_at_purchase,
+                order_id=order.order_id,
+                product_id=order.product_id
             ).returning(OrderItem.id)
 
             result = await self.session.execute(stmt)
@@ -66,14 +60,14 @@ class OrderService(BaseDatabaseDep):
         )
         return result.scalars().all()
 
-    async def get_item_id(self, order_id: int) -> Order:
-        stmt = select(Order).where(
-            Order.id == order_id
+    async def get_item_by_id(self, item_id: int) -> OrderItem:
+        stmt = select(OrderItem).where(
+            OrderItem.id == item_id
         )
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
     async def update_order_item_quantity(self, item_id: int, quantity: int) -> bool:
-        if not await self.get_item_id(item_id):
+        if not await self.get_item_by_id(item_id):
             return False
 
         await self.session.execute(
@@ -83,18 +77,20 @@ class OrderService(BaseDatabaseDep):
         return True
 
     async def delete_order_item(self, item_id: int) -> bool:
-        if not await self.get_item_id(item_id):
+        if not await self.get_item_by_id(item_id):
             return False
 
         await self.session.execute(delete(OrderItem).where(OrderItem.id == item_id))
         await self.session.commit()
         return True
 
-    async def get_orders_by_buyer(self, buyer_id: int) -> Optional[list[Order], dict[int, [OrderItem]]]:
+    async def get_orders_by_buyer(self, buyer_id: int) -> Optional[dict]:
         """
-        Returns:
-            - A list of the buyers orders.
-            - Dictionary of order elements, where the key is the order ID.
+        Returns dictionary with:
+        - 'orders': list of buyer's orders
+        - 'order_items': dictionary {order_id: list_of_items}
+
+        Returns None if no orders found
         """
         orders_result = await self.session.execute(
             select(Order).where(Order.buyer_id == buyer_id)
@@ -105,13 +101,17 @@ class OrderService(BaseDatabaseDep):
             return None
 
         order_ids = [order.id for order in orders]
+
         items_result = await self.session.execute(
             select(OrderItem).where(OrderItem.order_id.in_(order_ids))
         )
         items = items_result.scalars().all()
 
-        items_by_order = defaultdict(list)
+        order_items: dict[int, list[OrderItem]] = defaultdict(list)
         for item in items:
-            items_by_order[item.order_id].append(item)
+            order_items[item.order_id].append(item)
 
-        return [orders, items_by_order]
+        return {
+            'orders': orders,
+            'order_items': dict(order_items)
+        }

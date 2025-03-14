@@ -83,12 +83,25 @@ class OrderCreate(BaseModel):
     total_amount: float = Field(ge=0)
     shipping_address_id: int
 
+class OrderItemCreate(BaseModel):
+    order_id: int
+    product_id: int
+    quantity: int
+    price_at_purchase: float
+
 class OrderResponse(BaseModel):
     id: int
     buyer_id: int
     total_amount: float
     status: OrderStatus
     created_at: datetime
+
+class OrderItemResponse(BaseModel):
+    id: int
+    quantity: int
+    price_at_purchase: float
+    order_id: int
+    product_id: int
 
 
 class ReviewCreate(BaseModel):
