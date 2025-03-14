@@ -171,6 +171,27 @@ class CartItemUpdate(BaseModel):
     product_id: int
     quantity: int
 
+class CartItemRemove(BaseModel):
+    cart_id: int
+    product_id: Optional[int]
+    item_id: Optional[int]
+
+class CartItemsIds(BaseModel):
+    cart_id: Optional[int]
+    product_id: Optional[int]
+
+class CartResponse(BaseModel):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    user_id: int
+
+class CartItemResponse(BaseModel):
+    id: int
+    quantity: int
+    cart_id: int
+    product_id: int
+
 
 class AddressUpdate(BaseModel):
     street: str
