@@ -160,6 +160,11 @@ class UpdateCategory(BaseModel):
     name: Optional[str] = None
     parent_id: Optional[int] = None
 
+class CategoryResponse(BaseModel):
+    id: int
+    name: str
+    parent_id: Optional[int]
+
 
 class CartItemUpdate(BaseModel):
     cart_id: int
