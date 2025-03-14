@@ -50,7 +50,7 @@ async def delete_account(
 
 
 @user_router.post(
-    '/update_user',
+    '/user/update_user',
     response_model=StatusModel
 )
 async def update_user_data(
