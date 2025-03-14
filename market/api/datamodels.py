@@ -32,6 +32,18 @@ class UserCreate(BaseModel):
     password: str
     role: UserRole = UserRole.BUYER
 
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    password_hash: str
+    created_at: datetime
+    role: UserRole
+    is_active: bool
+    company_name: Optional[str]
+    tax_id: Optional[str]
+    phone_number: Optional[str]
+
 class UserSeller(BaseModel):
     id: int
     company_name: str

@@ -80,7 +80,7 @@ async def create_seller(
 
 @user_router.get(
     '/user/get_user_by_id/{user_id}',
-    response_model=UserCreate
+    response_model=UserResponse
 )
 async def get_user_by_id(
         user_id: int,
