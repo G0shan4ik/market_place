@@ -18,6 +18,7 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 class ActiveModel(BaseModel):
+    id: int
     role: UserRole
     username: str
     is_active: bool

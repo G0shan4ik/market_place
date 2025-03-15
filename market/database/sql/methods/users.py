@@ -46,8 +46,10 @@ class UserService(BaseDatabaseDep):
             if check_valid_pass:
                 if result.is_active:
                     return {
+                        'id': result.id,
                         'role': result.role,
                         'username': result.username,
+                        'is_active': result.is_active
                     }
                 else:
                     raise ValueError('Аккаунт пользователя удален')
@@ -80,7 +82,7 @@ class UserService(BaseDatabaseDep):
 
         raise ValueError(f'Пользователя с ID == {user_id} не существует!')
 
-    async def update_user(self, user_id: int, **data: dict) -> bool:
+    async def update_user(self, user_id: int, data: dict) -> bool:
         result = await self.get_by_id(user_id)
 
         if result:
