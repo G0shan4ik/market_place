@@ -20,15 +20,22 @@ class AddressService(BaseDatabaseDep):
         stmt = select(Address).where(
             Address.user_id == user_id
         )
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
+        assert result, f"У пользователя user_id=={user_id} нет адреса!"
+
+        return result
 
     async def get_address_by_id(self, address_id: int) -> Optional[Address]:
         stmt = select(Address).where(
             Address.id == address_id
         )
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def update_address(self, address_id: int, **data: dict) -> bool:
+        assert result, f"Адреса с address_id=={address_id} не существует!"
+
+        return result
+
+    async def update_address(self, address_id: int, data: dict) -> bool:
         address = self.get_address_by_id(address_id=address_id)
         if address:
             allowed_fields = {
@@ -38,10 +45,9 @@ class AddressService(BaseDatabaseDep):
                 "postal_code",
                 "country"
             }
-            update_data = {k: v for k, v in data.items() if k in allowed_fields}
 
-            if not update_data:
-                raise ValueError("Нет полей для обновления")
+            update_data = {k: v for k, v in data.items() if k in allowed_fields}
+            assert update_data, "Нет полей для обновления"
 
             stmt = (
                 update(Address)

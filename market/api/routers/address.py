@@ -43,9 +43,10 @@ async def delete_address(
 )
 async def update_address(
     address_id: int,
+    address: AddressUpdate,
     address_db: Annotated[AddressService, Depends(sql_helper_factory(AddressService))]
 ):
-    status: bool = await address_db.update_address(address_id)
+    status: bool = await address_db.update_address(address_id, address.model_dump(exclude_unset=True))
     return {
         'status': status
     }
@@ -77,7 +78,7 @@ async def get_address_by_id(
         address_id: int,
         address_db: Annotated[AddressService, Depends(sql_helper_factory(AddressService))]
 ):
-    _address: Address = await address_db.get_user_address(address_id)
+    _address: Address = await address_db.get_address_by_id(address_id)
     result: dict = {}
     if _address:
         inspector = inspect(Address)

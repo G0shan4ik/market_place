@@ -195,11 +195,11 @@ class CartItemResponse(BaseModel):
 
 
 class AddressUpdate(BaseModel):
-    street: str
-    city: str
-    state: str
-    postal_code: str
-    country: str
+    street: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    postal_code: Optional[str] = None
+    country: Optional[str] = None
 
 class AddressCreate(BaseModel):
     street: str
