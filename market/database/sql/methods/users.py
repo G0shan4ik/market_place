@@ -12,8 +12,7 @@ class UserService(BaseDatabaseDep):
             User.is_active == True
         )
         result = (await self.session.execute(stmt)).scalar_one_or_none()
-        if result:
-            raise ValueError('Пользователь уже зарегистрирован!')
+        assert result, 'Пользователь уже зарегистрирован!'
 
         stmt = insert(User).values(
             username=user.username,
@@ -37,26 +36,21 @@ class UserService(BaseDatabaseDep):
             User.email == user.email
         )
         result = (await self.session.execute(stmt)).scalar_one_or_none()
+        assert result, 'Пользователя не существует!'
 
-        if result:
-            check_valid_pass: bool = User().check_password(
-                simple_password=user.password,
-                hashed_password=result.password_hash
-            )
-            if check_valid_pass:
-                if result.is_active:
-                    return {
-                        'id': result.id,
-                        'role': result.role,
-                        'username': result.username,
-                        'is_active': result.is_active
-                    }
-                else:
-                    raise ValueError('Аккаунт пользователя удален')
-            else:
-                raise ValueError('Неверный пароль!')
-        else:
-            raise ValueError('Пользователя не существует!')
+        check_valid_pass: bool = User().check_password(
+            simple_password=user.password,
+            hashed_password=result.password_hash
+        )
+        assert check_valid_pass, 'Неверный пароль!'
+
+        assert result.is_active, 'Аккаунт пользователя удален'
+        return {
+            'id': result.id,
+            'role': result.role,
+            'username': result.username,
+            'is_active': result.is_active
+        }
 
     async def deactivate_user(self, user_id: int) -> bool:
         try:
@@ -77,10 +71,9 @@ class UserService(BaseDatabaseDep):
             User.id == user_id
         )
         result = (await self.session.execute(stmt)).scalar_one_or_none()
-        if result:
-            return result
 
-        raise ValueError(f'Пользователя с ID == {user_id} не существует!')
+        assert result, f'Пользователя с ID == {user_id} не существует!'
+        return result
 
     async def update_user(self, user_id: int, data: dict) -> bool:
         result = await self.get_by_id(user_id)
@@ -95,8 +88,7 @@ class UserService(BaseDatabaseDep):
             }
             update_data = {k: v for k, v in data.items() if k in allowed_fields}
 
-            if not update_data:
-                raise ValueError("Нет полей для обновления")
+            assert update_data, "Нет полей для обновления"
 
             stmt = (
                 update(User)
