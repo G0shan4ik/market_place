@@ -6,13 +6,14 @@ class UserService(BaseDatabaseDep):
         temp_user = User()
         temp_user.password = user.password
         password_hash = temp_user.password_hash
+        print(user.email, user.username, user.password, user.role)
 
         stmt = select(User).where(
             User.email == user.email).where(
             User.is_active == True
         )
         result = (await self.session.execute(stmt)).scalar_one_or_none()
-        assert result, 'Пользователь уже зарегистрирован!'
+        assert not result, 'Пользователь уже зарегистрирован!'
 
         stmt = insert(User).values(
             username=user.username,
