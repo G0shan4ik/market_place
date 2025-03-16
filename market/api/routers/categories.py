@@ -72,8 +72,8 @@ async def get_category_by_id(
 
 @category_router.get('/category/get_all_categories')
 async def get_all_categories(
-        limit: Optional[int],
-        category_db: Annotated[CategoryService, Depends(sql_helper_factory(CategoryService))]
+        category_db: Annotated[CategoryService, Depends(sql_helper_factory(CategoryService))],
+        limit: Optional[int] = None
 ):
     _categories: [Category] = await category_db.get_all_categories(limit)
     result: dict = {}

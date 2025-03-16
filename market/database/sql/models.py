@@ -100,7 +100,9 @@ class Category(Base):
 
     id: Mapped[int] = mapped_column(Integer(), autoincrement=True, primary_key=True)
     name: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
-    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey('categories.id'), nullable=True)
+    parent_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey('categories.id', ondelete="CASCADE"), nullable=True
+    )
 
 
 class Product(Base):
@@ -115,7 +117,7 @@ class Product(Base):
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     seller_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'), nullable=False)
+    category_id: Mapped[int] = mapped_column(ForeignKey('categories.id', ondelete="CASCADE"), nullable=False)
 
 
 class Order(Base):
@@ -128,7 +130,7 @@ class Order(Base):
     updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     buyer_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    shipping_address_id: Mapped[Optional[int]] = mapped_column(ForeignKey('addresses.id'))
+    shipping_address_id: Mapped[Optional[int]] = mapped_column(ForeignKey('addresses.id', ondelete="CASCADE"))
 
 
 class OrderItem(Base):
@@ -138,8 +140,8 @@ class OrderItem(Base):
     quantity: Mapped[int]
     price_at_purchase: Mapped[float]
 
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), nullable=False)
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id', ondelete="CASCADE"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id', ondelete="CASCADE"), nullable=False)
 
 
 class Address(Base):
@@ -165,7 +167,7 @@ class Payment(Base):
     status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
-    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id'), nullable=False)
+    order_id: Mapped[int] = mapped_column(ForeignKey('orders.id', ondelete="CASCADE"), nullable=False)
 
 
 class Review(Base):
@@ -177,7 +179,7 @@ class Review(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id', ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
         CheckConstraint('rating >= 1 AND rating <= 5', name='rating_range'),
@@ -200,8 +202,8 @@ class CartItem(Base):
     id: Mapped[int] = mapped_column(Integer(), primary_key=True)
     quantity: Mapped[int] = mapped_column(default=1, nullable=False)
 
-    cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id'), nullable=False)
-    product_id: Mapped[int] = mapped_column(ForeignKey('products.id'), nullable=False)
+    cart_id: Mapped[int] = mapped_column(ForeignKey('carts.id', ondelete="CASCADE"), nullable=False)
+    product_id: Mapped[int] = mapped_column(ForeignKey('products.id', ondelete="CASCADE"), nullable=False)
 
 
 __all__ = ["User", "Category", "Product", "Order",

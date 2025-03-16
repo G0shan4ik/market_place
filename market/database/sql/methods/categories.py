@@ -4,7 +4,7 @@ from .include import Category, select, update, delete, insert, BaseDatabaseDep, 
 class CategoryService(BaseDatabaseDep):
     async def create_category(self, category: CreateCategory) -> int:
         stmt = select(Category).where(
-            Category.name == category.name).where(
+            Category.name == category.name
         )
         result = (await self.session.execute(stmt)).scalar_one_or_none()
         if result:
@@ -23,16 +23,20 @@ class CategoryService(BaseDatabaseDep):
         stmt = select(Category).where(
             Category.id == category_id)
         result = (await self.session.execute(stmt)).scalar_one_or_none()
-        if result:
-            return
+        assert result, f'Категории с ID == {category_id} не существует!'
 
-        raise ValueError(f'Категории с ID == {category_id} не существует!')
+        return result
 
     async def get_all_categories(self, limit: int = None) -> [Category]:
+        assert (await self.session.execute(
+            select(Category).limit(1)
+        )).scalar_one_or_none(), f"Нет актуальных категорий!"
+
         stmt = select(Category)
         if limit is not None:
             stmt = stmt.limit(limit)
         result = await self.session.execute(stmt)
+
         return result.scalars().all()
 
     async def get_child_categories(self, parent_id: int) -> [Category]:
@@ -44,8 +48,9 @@ class CategoryService(BaseDatabaseDep):
         stmt = select(Category).where(
             Category.parent_id == parent_id
         )
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
+        assert (await self.session.execute(stmt.limit(1))).scalar_one_or_none(), f'Нет дочерних категорий (parent_id={parent_id})'
+
+        return (await self.session.execute(stmt)).scalars().all()
 
     async def update_category(self, category_id: int, **data: dict) -> bool:
         result = await self.get_category_by_id(category_id)
@@ -57,9 +62,7 @@ class CategoryService(BaseDatabaseDep):
             "parent_id"
         }
         update_data = {k: v for k, v in data.items() if k in allowed_fields}
-
-        if not update_data:
-            raise ValueError("Нет полей для обновления")
+        assert update_data, "Нет полей для обновления"
 
         stmt = (
             update(Category)
