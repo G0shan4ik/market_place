@@ -32,7 +32,7 @@ async def update_product(
     product: ProductUpdate,
     product_db: Annotated[ProductService, Depends(sql_helper_factory(ProductService))]
 ):
-    status: bool = await product_db.update_product(product_id, **product.model_dump(exclude_unset=True))
+    status: bool = await product_db.update_product(product_id, product.model_dump(exclude_unset=True))
     return {
         'status': status
     }

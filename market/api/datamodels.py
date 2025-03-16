@@ -78,10 +78,10 @@ class ProductResponse(BaseModel):
     created_at: datetime
 
 class ProductUpdate(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-    price: Optional[int]
-    stock: Optional[int]
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[int] = None
+    stock: Optional[int] = None
 
 
 class OrderStatus(str, Enum):

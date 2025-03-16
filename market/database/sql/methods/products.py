@@ -22,7 +22,7 @@ class ProductService(BaseDatabaseDep):
         )
         return (await self.session.execute(stmt)).scalar_one_or_none()
 
-    async def update_product(self, product_id: int, **data: dict) -> bool:
+    async def update_product(self, product_id: int, data: dict) -> bool:
         product = self.get_product_by_id(product_id=product_id)
         if product:
             allowed_fields = {
