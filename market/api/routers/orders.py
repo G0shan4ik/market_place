@@ -141,10 +141,7 @@ async def get_orders_by_buyer(
     return _order_buyer
 
 
-@order_router.get(
-    '/user/order_item/get_items',
-    response_model=OrderItemResponse
-)
+@order_router.get('/user/order_item/get_items')
 async def get_order_items(
         order_id: int,
         order_db: Annotated[OrderService, Depends(sql_helper_factory(OrderService))]

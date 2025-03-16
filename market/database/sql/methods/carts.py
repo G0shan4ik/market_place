@@ -16,15 +16,6 @@ class CartService(BaseDatabaseDep):
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def update_cart(self, cart_id: int) -> bool:
-        cart = await self.get_cart_by_id(cart_id)
-        if cart:
-            stmt = update(Cart).where(Cart.id == cart_id).values(updated_at=datetime.utcnow())
-            await self.session.execute(stmt)
-            await self.session.commit()
-            return True
-        return False
-
     async def delete_cart(self, cart_id: int) -> bool:
         cart = await self.get_cart_by_id(cart_id)
         if cart:
@@ -80,7 +71,7 @@ class CartService(BaseDatabaseDep):
         elif cart_item.item_id:
             stmt = delete(CartItem).where(CartItem.id == cart_item.item_id)
 
-        if stmt:
+        if stmt is not None:
             await self.session.execute(stmt)
             await self.session.commit()
             return True

@@ -1,10 +1,15 @@
 from collections import defaultdict
 
 from .include import Order, OrderItem, OrderItemCreate, select, delete, OrderCreate, update, insert, BaseDatabaseDep, OrderStatus, Optional
+from ..models import Address
 
 
 class OrderService(BaseDatabaseDep):
     async def create_order(self, order_: OrderCreate) -> int:
+        _stmt = select(Address).where(Address.id == order_.shipping_address_id)
+        assert (await self.session.execute(_stmt)).scalar_one_or_none(), \
+            f'Адреса с таким id не существует (shipping_address_id=={order_.shipping_address_id})'
+
         stmt = insert(Order).values(
             buyer_id=order_.buyer_id,
             total_amount=order_.total_amount,
@@ -18,7 +23,10 @@ class OrderService(BaseDatabaseDep):
         stmt = select(Order).where(
             Order.id == order_id
         )
-        return (await self.session.execute(stmt)).scalar_one_or_none()
+        result = (await self.session.execute(stmt)).scalar_one_or_none()
+        assert result, f"Ордера с таким id (order_id=={order_id}) не существует"
+
+        return result
 
     async def update_order_status(self, order_id: int, status: OrderStatus) -> bool:
         order = self.get_order_by_id(order_id=order_id)

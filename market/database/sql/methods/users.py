@@ -19,7 +19,7 @@ class UserService(BaseDatabaseDep):
             username=user.username,
             email=user.email,
             password_hash=password_hash,
-            role=UserRole.BUYER.value,
+            role=UserRole.BUYER,
             is_active=True,
         ).returning(User.id)
 

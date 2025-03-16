@@ -1,3 +1,5 @@
+import uuid
+from random import randint
 from .include import Payment, select, update, insert, BaseDatabaseDep, PaymentStatus, PaymentCreate, Optional
 
 
@@ -7,8 +9,9 @@ class PaymentService(BaseDatabaseDep):
             order_id=payment.order_id,
             amount=payment.amount,
             payment_method=payment.payment_method,
-            transaction_id=payment.transaction_id
-        )
+            transaction_id=f"{str(uuid.uuid4())}{randint(100000, 999999)}{randint(1000, 9999)}"
+        ).returning(Payment.id)
+
         payment_id: int = (await self.session.execute(stmt)).scalar()
         await self.session.commit()
         return payment_id

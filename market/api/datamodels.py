@@ -142,7 +142,6 @@ class PaymentCreate(BaseModel):
     order_id: int
     amount: float = Field(ge=0)
     payment_method: str
-    transaction_id: str
 
 class PaymentResponse(BaseModel):
     id: int
@@ -174,12 +173,12 @@ class CartItemUpdate(BaseModel):
 
 class CartItemRemove(BaseModel):
     cart_id: int
-    product_id: Optional[int]
-    item_id: Optional[int]
+    product_id: Optional[int] = None
+    item_id: Optional[int] = None
 
 class CartItemsIds(BaseModel):
-    cart_id: Optional[int]
-    product_id: Optional[int]
+    cart_id: Optional[int] = None
+    product_id: Optional[int] = None
 
 class CartResponse(BaseModel):
     id: int

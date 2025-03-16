@@ -96,7 +96,7 @@ async def get_user_by_id(
     return result
 
 
-@user_router.get('/user/get_user_by_role/')
+@user_router.get('/user/get_user_by_role')
 async def get_user_by_role(
         user_role: UserRole,
         user_db: Annotated[UserService, Depends(sql_helper_factory(UserService))],

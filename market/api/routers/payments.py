@@ -29,12 +29,12 @@ async def create_payment(
 )
 async def update_payment(
     payment_id: int,
-    _status: PaymentStatus,
+    status: PaymentStatus,
     payment_db: Annotated[PaymentService, Depends(sql_helper_factory(PaymentService))]
 ):
-    status: bool = await payment_db.update_payment_status(payment_id, _status)
+    _status: bool = await payment_db.update_payment_status(payment_id, status)
     return {
-        'status': status
+        'status': _status
     }
 
 

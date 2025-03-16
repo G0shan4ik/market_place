@@ -12,14 +12,14 @@ from sqlalchemy.orm import Mapped, mapped_column, validates
 from .core import Base
 
 
-class OrderStatus(enum.Enum):
+class OrderStatus(str, enum.Enum):
     PENDING = "pending"
     PROCESSING = "processing"
     SHIPPED = "shipped"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
 
-class PaymentStatus(enum.Enum):
+class PaymentStatus(str, enum.Enum):
     PENDING = "pending"
     COMPLETED = "completed"
     FAILED = "failed"
@@ -162,7 +162,7 @@ class Payment(Base):
 
     id: Mapped[int] = mapped_column(Integer(), primary_key=True)
     amount: Mapped[float] = mapped_column(nullable=False)
-    transaction_id: Mapped[str] = mapped_column(String(128), unique=True)
+    transaction_id: Mapped[str] = mapped_column(String(128), nullable=False)
     payment_method: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[PaymentStatus] = mapped_column(Enum(PaymentStatus), default=PaymentStatus.PENDING)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
