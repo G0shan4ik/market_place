@@ -1,1 +1,1 @@
-from . import api, database, mp_bot
+from . import api, database

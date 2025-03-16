@@ -9,4 +9,4 @@ def start_dev():
     if sys.platform == "win32":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-    run(["uvicorn", "main:app", "--reload", "--host=127.0.0.1", "--port=8000", "--reload"])
+    run(["uvicorn", "main:app", "--reload", "--host=0.0.0.0", "--port=8000", "--reload"])
